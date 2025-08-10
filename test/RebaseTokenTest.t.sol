@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-
 import {Vault} from "../src/Vault.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {RebaseToken} from "../src/RebaseToken.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-
 
 contract RebaseTokenTest is Test {
     RebaseToken private rebaseToken;
@@ -26,10 +24,8 @@ contract RebaseTokenTest is Test {
     }
 
     function addRewardsToVault(uint256 rewardAmount) public {
-        (bool success, ) = payable(address(vault)).call{value: rewardAmount}("");
+        (bool success,) = payable(address(vault)).call{value: rewardAmount}("");
     }
-
-
 
     // function testDepositLinear(uint256 amount) public {
     //     amount = bound(amount, 1e5, 1e18);
@@ -101,7 +97,7 @@ contract RebaseTokenTest is Test {
         vm.stopPrank();
     }
 
-    function testCanRedeemAfterTimePassed (uint256 depositAmount, uint256 time) public {
+    function testCanRedeemAfterTimePassed(uint256 depositAmount, uint256 time) public {
         time = bound(time, 1e5, type(uint96).max);
         depositAmount = bound(depositAmount, 1e5, type(uint96).max);
 
@@ -114,18 +110,17 @@ contract RebaseTokenTest is Test {
         vm.warp(block.timestamp + time);
         uint256 balanceAfterSomeTime = rebaseToken.balanceOf(user);
 
-        vm.deal(owner,  balanceAfterSomeTime - depositAmount);
+        vm.deal(owner, balanceAfterSomeTime - depositAmount);
         vm.prank(owner);
-        addRewardsToVault( balanceAfterSomeTime - depositAmount);
+        addRewardsToVault(balanceAfterSomeTime - depositAmount);
 
-        // redee balanceAfterSomeTime 
+        // redee balanceAfterSomeTime
         vm.prank(user);
         vault.redeem(type(uint256).max);
         uint256 ethBalance = address(user).balance;
 
         assertEq(ethBalance, balanceAfterSomeTime);
         assertGt(ethBalance, depositAmount);
-
     }
 
     function testCanTransfer(uint256 amount, uint256 amountToSend) public {

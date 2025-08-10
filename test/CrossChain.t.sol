@@ -15,15 +15,10 @@ import {RateLimiter} from "@ccip/contracts/src/v0.8/ccip/libraries/RateLimiter.s
 import {Client} from "@ccip/contracts/src/v0.8/ccip/libraries/Client.sol";
 import {IRouterClient} from "@ccip/contracts/src/v0.8/ccip/interfaces/IRouterClient.sol";
 
-
-
-
-
 contract CrossChainTest is Test {
-
-   address public owner = makeAddr("owner");
-   address public user = makeAddr("user");
-   uint256 constant SEND_VALUE = 1e5;
+    address public owner = makeAddr("owner");
+    address public user = makeAddr("user");
+    uint256 constant SEND_VALUE = 1e5;
 
     uint256 sepoliaFork;
     uint256 arbSepoliaFork;
@@ -39,6 +34,7 @@ contract CrossChainTest is Test {
 
     Register.NetworkDetails sepoliaNetworkDetails;
     Register.NetworkDetails arbSepoliaNetworkDetails;
+
     function setUp() public {
         address[] memory allowlist = new address[](0);
 
@@ -48,7 +44,7 @@ contract CrossChainTest is Test {
         ccipLocalSimulatorFork = new CCIPLocalSimulatorFork();
         vm.makePersistent(address(ccipLocalSimulatorFork));
 
-    // Deploy RebaseToken on Sepolia
+        // Deploy RebaseToken on Sepolia
         sepoliaNetworkDetails = ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
         vm.startPrank(owner);
         sepoliaToken = new RebaseToken();
@@ -59,19 +55,22 @@ contract CrossChainTest is Test {
             sepoliaNetworkDetails.routerAddress
         );
 
-
         vault = new Vault(address(sepoliaToken));
         vm.deal(address(vault), 1e18);
 
         sepoliaToken.grantMintAndBurnRole(address(vault));
         sepoliaToken.grantMintAndBurnRole(address(sepoliaPool));
 
-        RegistryModuleOwnerCustom(sepoliaNetworkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(address(sepoliaToken));
+        RegistryModuleOwnerCustom(sepoliaNetworkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(
+            address(sepoliaToken)
+        );
         TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(sepoliaToken));
-        TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(address(sepoliaToken), address(sepoliaPool));
+        TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(
+            address(sepoliaToken), address(sepoliaPool)
+        );
         vm.stopPrank();
 
-    // Deploy RebaseToken on Arbitrum Sepolia
+        // Deploy RebaseToken on Arbitrum Sepolia
         vm.selectFork(arbSepoliaFork);
         vm.startPrank(owner);
         arbSepoliaNetworkDetails = ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
@@ -83,30 +82,40 @@ contract CrossChainTest is Test {
             arbSepoliaNetworkDetails.routerAddress
         );
 
-
         arbSepoliaToken.grantMintAndBurnRole(address(arbSepoliaPool));
-        RegistryModuleOwnerCustom(arbSepoliaNetworkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(address(arbSepoliaToken));
+        RegistryModuleOwnerCustom(arbSepoliaNetworkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(
+            address(arbSepoliaToken)
+        );
         TokenAdminRegistry(arbSepoliaNetworkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(arbSepoliaToken));
-        TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(address(arbSepoliaToken), address(arbSepoliaPool));
+        TokenAdminRegistry(sepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(
+            address(arbSepoliaToken), address(arbSepoliaPool)
+        );
 
         vm.stopPrank();
 
-        configureTokenPool(sepoliaFork, 
-            TokenPool(sepoliaPool), 
+        configureTokenPool(
+            sepoliaFork,
+            TokenPool(sepoliaPool),
             arbSepoliaNetworkDetails.chainSelector,
             TokenPool(arbSepoliaPool),
             address(arbSepoliaToken)
         );
-        configureTokenPool(arbSepoliaFork, 
-            TokenPool(arbSepoliaPool), 
+        configureTokenPool(
+            arbSepoliaFork,
+            TokenPool(arbSepoliaPool),
             arbSepoliaNetworkDetails.chainSelector,
             TokenPool(sepoliaPool),
             address(sepoliaToken)
         );
-
     }
 
-    function configureTokenPool(uint256 fork, TokenPool localPool, uint64 remoteChainSelector, TokenPool remotePool, address remoteTokenAddress) public {
+    function configureTokenPool(
+        uint256 fork,
+        TokenPool localPool,
+        uint64 remoteChainSelector,
+        TokenPool remotePool,
+        address remoteTokenAddress
+    ) public {
         vm.selectFork(fork);
         vm.startPrank(owner);
         bytes[] memory remotePoolAddresses = new bytes[](1);
@@ -116,16 +125,8 @@ contract CrossChainTest is Test {
             remoteChainSelector: remoteChainSelector,
             remotePoolAddresses: remotePoolAddresses,
             remoteTokenAddress: abi.encode(remoteTokenAddress),
-            outboundRateLimiterConfig: RateLimiter.Config ({
-                isEnabled: false,
-                capacity: 0,
-                rate: 0
-            }),
-            inboundRateLimiterConfig: RateLimiter.Config ({
-                isEnabled: false,
-                capacity: 0,
-                rate: 0
-            })
+            outboundRateLimiterConfig: RateLimiter.Config({isEnabled: false, capacity: 0, rate: 0}),
+            inboundRateLimiterConfig: RateLimiter.Config({isEnabled: false, capacity: 0, rate: 0})
         });
         uint64[] memory remoteChainSelectorsToRemove = new uint64[](0);
         localPool.applyChainUpdates(remoteChainSelectorsToRemove, chainsToAdd);
@@ -141,15 +142,11 @@ contract CrossChainTest is Test {
         RebaseToken localToken,
         RebaseToken remoteToken
     ) public {
-
         vm.selectFork(localFork);
         vm.startPrank(user);
 
-        Client.EVMTokenAmount [] memory tokenAmounts = new Client.EVMTokenAmount[](1);
-        tokenAmounts[0] = Client.EVMTokenAmount({
-            token: address(localToken),
-            amount: amountToBridge
-        });
+        Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
+        tokenAmounts[0] = Client.EVMTokenAmount({token: address(localToken), amount: amountToBridge});
 
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(user),
@@ -158,7 +155,8 @@ contract CrossChainTest is Test {
             feeToken: localNetworkDetails.linkAddress,
             extraArgs: ""
         });
-        uint256 fee =IRouterClient(localNetworkDetails.routerAddress).getFee(remoteNetworkDetails.chainSelector, message);
+        uint256 fee =
+            IRouterClient(localNetworkDetails.routerAddress).getFee(remoteNetworkDetails.chainSelector, message);
         ccipLocalSimulatorFork.requestLinkFromFaucet(user, fee);
         vm.prank(user);
         IERC20(localNetworkDetails.linkAddress).approve(localNetworkDetails.routerAddress, fee);
@@ -177,7 +175,6 @@ contract CrossChainTest is Test {
         ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork);
         uint256 remoteBalanceAfter = remoteToken.balanceOf(user);
         assertEq(remoteBalanceAfter, remoteBalanceBefore + amountToBridge);
-
     }
 
     function testBridgeAllTokens() public {
@@ -207,8 +204,5 @@ contract CrossChainTest is Test {
             arbSepoliaToken,
             sepoliaToken
         );
-
     }
 }
-
-

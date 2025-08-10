@@ -6,16 +6,18 @@ import {IRouterClient} from "@ccip/contracts/src/v0.8/ccip/interfaces/IRouterCli
 import {IERC20} from "@ccip/contracts/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/IERC20.sol";
 import {Client} from "@ccip/contracts/src/v0.8/ccip/libraries/Client.sol";
 
-
-
 contract BridgeTokensScript is Script {
-    function run(address receiverAddress, uint64 destinationChainSelector, address tokenToSendAddress, uint256 amountToSend, address linkTokenAddress, address routerAddress) public {
+    function run(
+        address receiverAddress,
+        uint64 destinationChainSelector,
+        address tokenToSendAddress,
+        uint256 amountToSend,
+        address linkTokenAddress,
+        address routerAddress
+    ) public {
         vm.startBroadcast();
         Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
-        tokenAmounts[0] = Client.EVMTokenAmount({
-            token: tokenToSendAddress,
-            amount: amountToSend
-        });
+        tokenAmounts[0] = Client.EVMTokenAmount({token: tokenToSendAddress, amount: amountToSend});
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(receiverAddress),
             tokenAmounts: tokenAmounts,

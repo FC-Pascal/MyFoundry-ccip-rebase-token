@@ -7,11 +7,11 @@ import {Pool} from "@ccip/contracts/src/v0.8/ccip/libraries/Pool.sol";
 import {IERC20} from "@ccip/contracts/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/IERC20.sol";
 
 contract RebaseTokenPool is TokenPool {
-    constructor(IERC20 _token, address[] memory _allowlist, address _rnmProxy, address _router) 
+    constructor(IERC20 _token, address[] memory _allowlist, address _rnmProxy, address _router)
         TokenPool(_token, 18, _allowlist, _rnmProxy, _router)
     {}
 
-        function lockOrBurn(Pool.LockOrBurnInV1 calldata lockOrBurnIn)
+    function lockOrBurn(Pool.LockOrBurnInV1 calldata lockOrBurnIn)
         external
         virtual
         override
@@ -26,21 +26,13 @@ contract RebaseTokenPool is TokenPool {
         });
     }
 
-     function releaseOrMint(Pool.ReleaseOrMintInV1 calldata releaseOrMintIn)
+    function releaseOrMint(Pool.ReleaseOrMintInV1 calldata releaseOrMintIn)
         external
         returns (Pool.ReleaseOrMintOutV1 memory)
     {
         _validateReleaseOrMint(releaseOrMintIn);
         uint256 userInterestRate = abi.decode(releaseOrMintIn.sourcePoolData, (uint256));
-        IRebaseToken(address(i_token)).mint(
-            releaseOrMintIn.receiver,
-            releaseOrMintIn.amount,
-            userInterestRate
-        );
-        return Pool.ReleaseOrMintOutV1({
-            destinationAmount: releaseOrMintIn.amount
-
-        });
+        IRebaseToken(address(i_token)).mint(releaseOrMintIn.receiver, releaseOrMintIn.amount, userInterestRate);
+        return Pool.ReleaseOrMintOutV1({destinationAmount: releaseOrMintIn.amount});
     }
-
 }

@@ -5,13 +5,23 @@ import {Script} from "forge-std/Script.sol";
 import {TokenPool} from "@ccip/contracts/src/v0.8/ccip/pools/TokenPool.sol";
 import {RateLimiter} from "@ccip/contracts/src/v0.8/ccip/libraries/RateLimiter.sol";
 
-
 contract ConfigurePool is Script {
-    function run(address localPool, uint64 remoteChainSelector, address remotePool, address remoteToken, bool outboundRateLimiterIsEnabled, uint128 outboundRateLimiterCapacity, uint128 outboundRateLimiterRate , bool inboundRateLimiterIsEnabled, uint128 inboundRateLimiterCapacity, uint128 inboundRateLimiterRate) external {
+    function run(
+        address localPool,
+        uint64 remoteChainSelector,
+        address remotePool,
+        address remoteToken,
+        bool outboundRateLimiterIsEnabled,
+        uint128 outboundRateLimiterCapacity,
+        uint128 outboundRateLimiterRate,
+        bool inboundRateLimiterIsEnabled,
+        uint128 inboundRateLimiterCapacity,
+        uint128 inboundRateLimiterRate
+    ) external {
         vm.startBroadcast();
         bytes[] memory remotePoolAddresses = new bytes[](1);
         remotePoolAddresses[0] = abi.encode(remotePool);
-        TokenPool.ChainUpdate[]  memory chainsToAdd = new TokenPool.ChainUpdate[] (1);
+        TokenPool.ChainUpdate[] memory chainsToAdd = new TokenPool.ChainUpdate[](1);
         chainsToAdd[0] = TokenPool.ChainUpdate({
             remoteChainSelector: remoteChainSelector,
             remotePoolAddresses: remotePoolAddresses,

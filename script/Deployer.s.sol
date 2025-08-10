@@ -11,27 +11,23 @@ import {TokenAdminRegistry} from "@ccip/contracts/src/v0.8/ccip/tokenAdminRegist
 import {CCIPLocalSimulatorFork, Register} from "@chainlink-local/src/ccip/CCIPLocalSimulatorFork.sol";
 import {IERC20} from "@ccip/contracts/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/IERC20.sol";
 
-
-
-
-contract TokenAndPoolDeployer is Script  {
-
-    
+contract TokenAndPoolDeployer is Script {
     function run() external returns (RebaseToken rebaseToken, RebaseTokenPool rebaseTokenPool) {
         CCIPLocalSimulatorFork ccipLocalSimulatorFork = new CCIPLocalSimulatorFork();
         Register.NetworkDetails memory networkDetails = ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
         vm.startBroadcast();
         rebaseToken = new RebaseToken();
         rebaseTokenPool = new RebaseTokenPool(
-            IERC20(address(rebaseToken)),
-            new address[](0), 
-            networkDetails.rmnProxyAddress,
-            networkDetails.routerAddress
+            IERC20(address(rebaseToken)), new address[](0), networkDetails.rmnProxyAddress, networkDetails.routerAddress
         );
         rebaseToken.grantMintAndBurnRole(address(rebaseTokenPool));
-        RegistryModuleOwnerCustom(networkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(address(rebaseToken));
+        RegistryModuleOwnerCustom(networkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(
+            address(rebaseToken)
+        );
         TokenAdminRegistry(networkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(rebaseToken));
-        TokenAdminRegistry(networkDetails.tokenAdminRegistryAddress).setPool(address(rebaseToken), address(rebaseTokenPool));
+        TokenAdminRegistry(networkDetails.tokenAdminRegistryAddress).setPool(
+            address(rebaseToken), address(rebaseTokenPool)
+        );
         vm.stopBroadcast();
     }
 }
