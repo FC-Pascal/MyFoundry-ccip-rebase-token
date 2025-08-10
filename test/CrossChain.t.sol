@@ -103,7 +103,7 @@ contract CrossChainTest is Test {
         configureTokenPool(
             arbSepoliaFork,
             TokenPool(arbSepoliaPool),
-            arbSepoliaNetworkDetails.chainSelector,
+            sepoliaNetworkDetails.chainSelector,
             TokenPool(sepoliaPool),
             address(sepoliaToken)
         );
@@ -158,12 +158,9 @@ contract CrossChainTest is Test {
         uint256 fee =
             IRouterClient(localNetworkDetails.routerAddress).getFee(remoteNetworkDetails.chainSelector, message);
         ccipLocalSimulatorFork.requestLinkFromFaucet(user, fee);
-        vm.prank(user);
         IERC20(localNetworkDetails.linkAddress).approve(localNetworkDetails.routerAddress, fee);
-        vm.prank(user);
         IERC20(address(localToken)).approve(localNetworkDetails.routerAddress, amountToBridge);
         uint256 localBalanceBefore = localToken.balanceOf(user);
-        vm.prank(user);
         IRouterClient(localNetworkDetails.routerAddress).ccipSend(remoteNetworkDetails.chainSelector, message);
         uint256 localBalanceAfter = localToken.balanceOf(user);
         assertEq(localBalanceAfter, localBalanceBefore - amountToBridge);
