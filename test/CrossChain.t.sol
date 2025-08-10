@@ -58,8 +58,8 @@ contract CrossChainTest is Test {
         vault = new Vault(address(sepoliaToken));
         vm.deal(address(vault), 1e18);
 
-        sepoliaToken.grantMintAndBurnRole(address(vault));
         sepoliaToken.grantMintAndBurnRole(address(sepoliaPool));
+        sepoliaToken.grantMintAndBurnRole(address(vault));
 
         RegistryModuleOwnerCustom(sepoliaNetworkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(
             address(sepoliaToken)
