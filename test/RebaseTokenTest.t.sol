@@ -6,6 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {RebaseToken} from "../src/RebaseToken.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IAccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {IRebaseToken} from "../src/interfaces/IRebaseToken.sol";
 
 contract RebaseTokenTest is Test {
     RebaseToken private rebaseToken;
@@ -17,7 +18,7 @@ contract RebaseTokenTest is Test {
     function setUp() public {
         vm.startPrank(owner);
         rebaseToken = new RebaseToken();
-        vault = new Vault(address(rebaseToken));
+        vault = new Vault(IRebaseToken(address(rebaseToken)));
         rebaseToken.grantMintAndBurnRole(address(vault));
         // (bool success, ) = address(vault).call{value: 1 ether}("");
         vm.stopPrank();

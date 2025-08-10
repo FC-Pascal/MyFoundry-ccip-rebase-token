@@ -13,7 +13,7 @@ contract Vault {
 
     IRebaseToken private immutable i_rebaseToken;
 
-    constructor(address _rebaseToken) {
+    constructor(IRebaseToken _rebaseToken) {
         i_rebaseToken = IRebaseToken(_rebaseToken);
     }
 
